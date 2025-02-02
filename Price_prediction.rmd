@@ -1,0 +1,782 @@
+---
+title: "Regression_project"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+
+```{r }
+# Load necessary libraries
+library(dplyr)
+
+# Load the dataset
+miami_housing <- read.csv("Maimi_housing_dataset.csv")
+
+# View the structure of the dataset
+str(miami_housing)
+
+# Check for missing values
+missing_values <- sapply(miami_housing, function(x) sum(is.na(x)))
+print(missing_values)
+
+# Check for duplicate rows
+duplicate_rows <- miami_housing[duplicated(miami_housing), ]
+print(duplicate_rows)
+summary(miami_housing)
+```
+
+
+
+```{r}
+# Fit linear regression model using all predictors
+lm_model <- lm(SALE_PRC ~ ., data = miami_housing)
+
+# Print summary of the linear regression model
+summary(lm_model)
+
+```
+
+
+
+```{r}
+# Calculate correlation matrix
+correlation_matrix <- cor(miami_housing)
+
+# Print correlation matrix
+print(correlation_matrix)
+
+```
+
+
+
+```{r}
+library(ggplot2)
+
+# Create histograms for all variables
+plots <- lapply(names(miami_housing), function(var) {
+  ggplot(miami_housing, aes(x = !!sym(var))) +
+    geom_histogram(fill = "skyblue", color = "black", bins = 30) +
+    labs(title = paste("Histogram of", var), x = var, y = "Frequency")
+})
+
+# Print all histograms
+plots
+```
+
+```{r}
+# Plot histogram for SALE_PRC
+hist(miami_housing$SALE_PRC, 
+     col = "skyblue",   
+     border = "black",  
+     main = "Histogram of SALE_PRC",  
+     xlab = "Sale Price ($)",      
+     ylab = "Frequency"
+)
+
+# Normalize SALE_PRC using logarithm transformation
+miami_housing$SALE_PRC <- log(miami_housing$SALE_PRC)
+hist(log(miami_housing$SALE_PRC), 
+     col = "skyblue",   
+     border = "black",  
+     main = "Histogram of Log(SALE_PRC)",  
+     xlab = "Log(Sale Price ($))",      
+     ylab = "Frequency"
+)
+```
+
+
+```{r}
+# Plot histogram for LND_SQFOOT
+hist(miami_housing$LND_SQFOOT, 
+     col = "lightgreen",   
+     border = "black",  
+     main = "Histogram of LND_SQFOOT",  
+     xlab = "Land Area (square feet)",      
+     ylab = "Frequency"
+)
+
+# Normalize LND_SQFOOT using logarithm transformation
+miami_housing$LND_SQFOOT <- log(miami_housing$LND_SQFOOT)
+hist(log(miami_housing$LND_SQFOOT), 
+     col = "lightgreen",   
+     border = "black",  
+     main = "Histogram of Log(LND_SQFOOT)",  
+     xlab = "Log(Land Area (square feet))",      
+     ylab = "Frequency"
+)
+
+# Continue normalizing histograms for each variable in a similar manner
+
+```
+
+
+```{r}
+# Plot histogram for TOT_LVG_AREA
+hist(miami_housing$TOT_LVG_AREA, 
+     col = "lightcoral",   
+     border = "black",  
+     main = "Histogram of TOT_LVG_AREA",  
+     xlab = "Floor Area (square feet)",      
+     ylab = "Frequency"
+)
+
+# Normalize TOT_LVG_AREA using logarithm transformation
+miami_housing$TOT_LVG_AREA <- log(miami_housing$TOT_LVG_AREA)
+hist(log(miami_housing$TOT_LVG_AREA), 
+     col = "lightcoral",   
+     border = "black",  
+     main = "Histogram of Log(TOT_LVG_AREA)",  
+     xlab = "Log(Floor Area (square feet))",      
+     ylab = "Frequency"
+)
+```
+
+
+```{r}
+# Plot histogram for SPEC_FEAT_VAL
+hist(miami_housing$SPEC_FEAT_VAL, 
+     col = "lightpink",   
+     border = "black",  
+     main = "Histogram of SPEC_FEAT_VAL",  
+     xlab = "Value of Special Features ($)",      
+     ylab = "Frequency"
+)
+```
+
+
+
+
+```{r}
+# Plot histogram for RAIL_DIST
+hist(miami_housing$RAIL_DIST, 
+     col = "lightblue",   
+     border = "black",  
+     main = "Histogram of RAIL_DIST",  
+     xlab = "Distance to Rail Line (feet)",      
+     ylab = "Frequency"
+)
+
+# Normalize RAIL_DIST using logarithm transformation
+miami_housing$RAIL_DIST <- log(miami_housing$RAIL_DIST)
+hist(log(miami_housing$RAIL_DIST ), 
+     col = "lightblue",   
+     border = "black",  
+     main = "Histogram of log(RAIL_DIST)",  
+     xlab = "log(Distance to Rail Line (feet))",      
+     ylab = "Frequency"
+)
+```
+
+
+```{r}
+# Plot histogram for OCEAN_DIST
+hist(miami_housing$OCEAN_DIST, 
+     col = "lightyellow",   
+     border = "black",  
+     main = "Histogram of OCEAN_DIST",  
+     xlab = "Distance to Ocean (feet)",      
+     ylab = "Frequency"
+)
+
+# Normalize OCEAN_DIST using logarithm transformation
+miami_housing$OCEAN_DIST <- log(miami_housing$OCEAN_DIST )
+hist(log(miami_housing$OCEAN_DIST ), 
+     col = "lightyellow",   
+     border = "black",  
+     main = "Histogram of Log(OCEAN_DIST)",  
+     xlab = "Log(Distance to Ocean (feet))",      
+     ylab = "Frequency"
+)
+
+
+```
+
+
+```{r}
+# Plot histogram for WATER_DIST
+hist(miami_housing$WATER_DIST, 
+     col = "lightgray",   
+     border = "black",  
+     main = "Histogram of WATER_DIST",  
+     xlab = "Distance to Water (feet)",      
+     ylab = "Frequency"
+)
+
+
+# Normalize WATER_DIST using logarithm transformation
+miami_housing$WATER_DIST <- log(miami_housing$WATER_DIST +1)
+hist(log(miami_housing$WATER_DIST +1), 
+     col = "lightgray",   
+     border = "black",  
+     main = "Histogram of Log(WATER_DIST)",  
+     xlab = "Log(Distance to Water (feet))",      
+     ylab = "Frequency"
+)
+
+
+```
+
+
+```{r}
+# Plot histogram for CNTR_DIST
+hist(miami_housing$CNTR_DIST, 
+     col = "orange",   
+     border = "black",  
+     main = "Histogram of CNTR_DIST",  
+     xlab = "Distance to CBD (feet)",      
+     ylab = "Frequency"
+)
+
+# Normalize CNTR_DIST using logarithm transformation
+miami_housing$CNTR_DIST <- log(miami_housing$CNTR_DIST)
+hist(log(miami_housing$CNTR_DIST), 
+     col = "orange",   
+     border = "black",  
+     main = "Histogram of Log(CNTR_DIST)",  
+     xlab = "Log(Distance to CBD (feet))",      
+     ylab = "Frequency"
+)
+
+
+```
+
+
+```{r}
+# Plot histogram for SUBCNTR_DI
+hist(miami_housing$SUBCNTR_DI, 
+     col = "lightcyan",   
+     border = "black",  
+     main = "Histogram of SUBCNTR_DI",  
+     xlab = "Distance to Subcenter (feet)",      
+     ylab = "Frequency"
+)
+
+# Normalize SUBCNTR_DI using logarithm transformation
+miami_housing$SUBCNTR_DI <- log(miami_housing$SUBCNTR_DI)
+hist(log(miami_housing$SUBCNTR_DI), 
+     col = "lightcyan",   
+     border = "black",  
+     main = "Histogram of Log(SUBCNTR_DI)",  
+     xlab = "Log(Distance to Subcenter (feet))",      
+     ylab = "Frequency"
+)
+
+
+```
+
+
+```{r}
+# Plot histogram for HWY_DIST
+hist(miami_housing$HWY_DIST, 
+     col = "purple",   
+     border = "black",  
+     main = "Histogram of HWY_DIST",  
+     xlab = "Distance to Highway (feet)",      
+     ylab = "Frequency"
+)
+
+# Normalize HWY_DIST using logarithm transformation
+miami_housing$HWY_DIST <- log(miami_housing$HWY_DIST)
+hist(log(miami_housing$HWY_DIST), 
+     col = "purple",   
+     border = "black",  
+     main = "Histogram of Log(HWY_DIST)",  
+     xlab = "Log(Distance to Highway (feet))",      
+     ylab = "Frequency"
+)
+
+
+```
+
+
+```{r}
+# Plot histogram for age
+hist(miami_housing$age, 
+     col = "lightgreen",   
+     border = "black",  
+     main = "Histogram of age",  
+     xlab = "Age of the Structure",      
+     ylab = "Frequency"
+)
+
+```
+
+
+```{r}
+# Plot histogram for LATITUDE
+hist(miami_housing$LATITUDE, 
+     col = "lightyellow",   
+     border = "black",  
+     main = "Histogram of LATITUDE",  
+     xlab = "Latitude",      
+     ylab = "Frequency"
+)
+
+```
+
+```{r}
+
+
+hist(miami_housing$LONGITUDE,  
+     breaks = 5,
+     col = "lightpink",   
+     border = "black",  
+     main = "Histogram of LONGITUDE",  
+     xlab = "Longitude",      
+     ylab = "Frequency",
+)
+
+
+```
+
+
+```{r}
+# Plot histogram for avno60plus
+hist(miami_housing$avno60plus, 
+     col = "lightblue",   
+     border = "black",  
+     main = "Histogram of avno60plus",  
+     xlab = "Airplane Noise Exceeding Level (0 = No, 1 = Yes)",      
+     ylab = "Frequency"
+)
+
+```
+
+
+```{r}
+# Plot histogram for structure_quality
+hist(miami_housing$structure_quality, 
+     col = "lightgreen",   
+     border = "black",  
+     main = "Histogram of structure_quality",  
+     xlab = "Structure Quality",      
+     ylab = "Frequency"
+)
+
+```
+
+
+```{r}
+# Plot histogram for month_sold
+hist(miami_housing$month_sold, 
+     col = "lightcoral",   
+     border = "black",  
+     main = "Histogram of month_sold",  
+     xlab = "Sale Month in 2016",      
+     ylab = "Frequency"
+)
+
+# Normalize month_sold using logarithm transformation
+miami_housing$month_sold <- log(miami_housing$month_sold)
+hist(log(miami_housing$month_sold), 
+     col = "lightcoral",   
+     border = "black",  
+     main = "Histogram of Log(month_sold)",  
+     xlab = "Log(Sale Month in 2016)",      
+     ylab = "Frequency"
+)
+
+
+```
+
+
+
+```{r}
+# Load required library
+library(car)
+
+# Fit your linear regression model
+lm_model <- lm(SALE_PRC ~ ., data = miami_housing)
+summary(lm_model)
+# Calculate VIF for predictor variables
+vif_results <- vif(lm_model)
+
+# Print VIF results
+print(vif_results)
+
+```
+```{r}
+# Fit linear regression model without using .
+lm_model <- lm(SALE_PRC ~ LATITUDE + LONGITUDE + PARCELNO + LND_SQFOOT + TOT_LVG_AREA +
+                SPEC_FEAT_VAL + RAIL_DIST + OCEAN_DIST + WATER_DIST  +
+                SUBCNTR_DI + HWY_DIST + age + avno60plus + month_sold + structure_quality, 
+               data = miami_housing)
+
+# Print summary of the linear regression model
+summary(lm_model)
+
+```
+
+
+```{r}
+vif_results <- vif(lm_model)
+
+# Print VIF results
+print(vif_results)
+
+```
+
+
+```{r}
+
+# Fit linear regression model without using .
+lm_model <- lm(SALE_PRC ~ LATITUDE + PARCELNO + LND_SQFOOT + TOT_LVG_AREA +
+                SPEC_FEAT_VAL + RAIL_DIST + OCEAN_DIST + WATER_DIST  +
+                SUBCNTR_DI + HWY_DIST + age + month_sold + structure_quality, 
+               data = miami_housing)
+
+# Print summary of the linear regression model
+summary(lm_model)
+
+```
+
+```{r}
+vif_results <- vif(lm_model)
+
+# Print VIF results
+print(vif_results)
+
+```
+
+```{r}
+# Load required library
+library(MASS)
+
+lm_model <- lm(SALE_PRC ~ LATITUDE + PARCELNO + LND_SQFOOT + TOT_LVG_AREA +
+                SPEC_FEAT_VAL + RAIL_DIST + OCEAN_DIST + WATER_DIST  +
+                SUBCNTR_DI + HWY_DIST + age + month_sold + structure_quality, 
+               data = miami_housing)
+
+# Perform stepwise model selection using AIC
+stepwise_model <- stepAIC(lm_model, direction = "both")
+
+# Print summary of the selected model
+summary(stepwise_model)
+
+```
+
+
+```{r}
+# Create interaction terms for selected pairs of predictors
+miami_housing$LATLON <- miami_housing$LATITUDE * miami_housing$LONGITUDE
+miami_housing$LND_TOT_LVG_AREA <- miami_housing$LND_SQFOOT * miami_housing$TOT_LVG_AREA
+miami_housing$RAIL_OCEAN_DIST <- miami_housing$RAIL_DIST * miami_housing$OCEAN_DIST
+miami_housing$WATER_SUBCNTR_DI <- miami_housing$WATER_DIST * miami_housing$SUBCNTR_DI
+miami_housing$HWY_age <- miami_housing$HWY_DIST * miami_housing$age
+miami_housing$SPEC_MONTH <- miami_housing$SPEC_FEAT_VAL * miami_housing$month_sold
+miami_housing$AGE_STRUCTURE <- miami_housing$age * miami_housing$structure_quality
+miami_housing$LND_SQFOOT_WATER <- miami_housing$LND_SQFOOT * miami_housing$WATER_DIST
+miami_housing$TOT_LVG_AREA_SUBCNTR_DI <- miami_housing$TOT_LVG_AREA * miami_housing$SUBCNTR_DI
+miami_housing$HWY_DIST_MONTH <- miami_housing$HWY_DIST * miami_housing$month_sold
+miami_housing$AGE_SPEC_FEAT <- miami_housing$age * miami_housing$SPEC_FEAT_VAL
+```
+
+
+```{r}
+
+# Fit linear regression model using all predictors
+interaction_model <- lm(SALE_PRC ~ ., data = miami_housing)
+
+# Print summary of the linear regression model
+summary(interaction_model)
+
+```
+
+
+
+```{r}
+# Load required library
+library(MASS)
+
+interaction_model <- lm(SALE_PRC ~ ., data = miami_housing)
+
+
+# Perform stepwise model selection using AIC
+stepwise_interaction_model <- stepAIC(interaction_model, direction = "both")
+
+# Print summary of the selected model
+summary(stepwise_interaction_model)
+
+```
+
+
+
+
+```{r}
+stepwise_interaction_model <- lm(SALE_PRC ~ LATITUDE + PARCELNO + LND_SQFOOT + TOT_LVG_AREA + 
+    SPEC_FEAT_VAL + RAIL_DIST + OCEAN_DIST + WATER_DIST + CNTR_DIST + 
+    SUBCNTR_DI + HWY_DIST + age + month_sold + structure_quality + 
+    LATLON + LND_TOT_LVG_AREA + WATER_SUBCNTR_DI + HWY_age + 
+    AGE_STRUCTURE + LND_SQFOOT_WATER, data = miami_housing)
+
+# Print summary of the linear regression model
+summary(stepwise_interaction_model)
+
+```
+
+```{r}
+stepwise_interaction_model <- lm(SALE_PRC ~ LATITUDE + PARCELNO + LND_SQFOOT + TOT_LVG_AREA + 
+    SPEC_FEAT_VAL + RAIL_DIST + OCEAN_DIST + WATER_DIST + CNTR_DIST + 
+    SUBCNTR_DI + HWY_DIST + age + structure_quality + 
+    LATLON + LND_TOT_LVG_AREA + WATER_SUBCNTR_DI + HWY_age + 
+    AGE_STRUCTURE + LND_SQFOOT_WATER, data = miami_housing)
+
+# Print summary of the linear regression model
+summary(stepwise_interaction_model)
+```
+
+```{r}
+
+stepwise_interaction_model <- lm(SALE_PRC ~ LATITUDE + PARCELNO + LND_SQFOOT + TOT_LVG_AREA + 
+    SPEC_FEAT_VAL + OCEAN_DIST + WATER_DIST + CNTR_DIST + 
+    SUBCNTR_DI + HWY_DIST + age + structure_quality + 
+    LATLON + LND_TOT_LVG_AREA + WATER_SUBCNTR_DI + HWY_age + 
+    AGE_STRUCTURE + LND_SQFOOT_WATER, data = miami_housing)
+
+# Print summary of the linear regression model
+summary(stepwise_interaction_model)
+```
+
+```{r}
+
+final_model <- lm(SALE_PRC ~ LATITUDE + PARCELNO + LND_SQFOOT + TOT_LVG_AREA + 
+    SPEC_FEAT_VAL + OCEAN_DIST + WATER_DIST + CNTR_DIST + 
+    SUBCNTR_DI + HWY_DIST + age + structure_quality + 
+    LATLON + LND_TOT_LVG_AREA + WATER_SUBCNTR_DI + HWY_age + LND_SQFOOT_WATER, data = miami_housing)
+
+# Print summary of the linear regression model
+summary(final_model)
+```
+
+```{r}
+# Load the caret package
+library(caret)
+
+# Set the seed for reproducibility
+set.seed(123)
+
+ctrl <- trainControl(method = "cv",   # Use cross-validation
+                     number = 10,      # Number of folds
+                     verboseIter = TRUE)  # Print progress
+
+model <- train(SALE_PRC ~ LATITUDE + PARCELNO + LND_SQFOOT + TOT_LVG_AREA + 
+    SPEC_FEAT_VAL + OCEAN_DIST + WATER_DIST + CNTR_DIST + 
+    SUBCNTR_DI + HWY_DIST + age + structure_quality + 
+    LATLON + LND_TOT_LVG_AREA + WATER_SUBCNTR_DI + HWY_age + LND_SQFOOT_WATER, 
+               data = miami_housing, 
+               method = "lm",    # linear regression 
+               trControl = ctrl)
+
+
+print(model)
+
+```
+
+```{r}
+# Extract residuals from the final_model
+residuals <- residuals(final_model)
+
+# Create a residuals vs. fitted values plot
+plot(final_model$fitted.values, residuals, 
+     main = "Residuals vs Fitted Values", 
+     xlab = "Fitted Values", 
+     ylab = "Residuals", 
+     col = "darkseagreen", # Set color of points
+     pch = 16,          # Set point shape
+     cex = 1.2)         # Set point size
+
+# Add a horizontal line at y = 0
+abline(h = 0, col = "blue", lwd = 2)
+
+# Add a smooth line to visualize trends
+lines(lowess(final_model$fitted.values, residuals), col = "red", lwd = 2)
+
+# Add grid lines
+grid(col = "lightgray")
+
+# Add legend
+legend("topleft", legend = c("Residuals", "Smooth Line"),
+       col = c("darkseagreen", "red"), lty = 1, lwd = 2, cex = 0.8)
+
+# Add a title
+title(main = "Residuals vs Fitted Values")
+
+# Add labels
+xlabel <- expression(paste("Fitted Values"))
+ylabel <- expression(paste("Residuals"))
+
+```
+
+```{r}
+# Print the first few residuals
+cat("First few residuals:\n")
+head(residuals)
+
+# Calculate the sum of residuals
+residual_sum <- sum(residuals)
+cat("Sum of residuals:", residual_sum, "\n")
+
+# Plot histogram of residuals
+hist(residuals, breaks = 25, col = "darkslateblue", main = "Histogram of Residuals",
+     xlab = "Residuals", ylab = "Frequency", border = "white")
+
+# Add a vertical line at mean of residuals
+abline(v = mean(residuals), col = "red", lwd = 2)
+
+# Add a legend
+legend("topright", legend = c("Residuals", "Mean"),
+       col = c("darkslateblue", "red"), lty = 1, lwd = 2)
+
+# Add grid
+grid(col = "lightgray")
+
+# Add a title
+title(main = "Histogram of Residuals")
+
+# Add labels
+xlabel <- expression(paste("Residuals"))
+ylabel <- expression(paste("Frequency"))
+
+
+```
+
+```{r}
+# Plot diagnostics for the regression model
+par(mfrow = c(2, 2))
+
+# Residuals vs Fitted Values Plot
+plot(final_model, which = 1, col = "limegreen", main = "Residuals vs Fitted")
+
+# Normal Q-Q Plot
+plot(final_model, which = 2, col = "maroon", main = "Normal Q-Q Plot")
+
+# Scale-Location Plot (Square Root of Standardized Residuals vs Fitted Values)
+plot(final_model, which = 3, col = "cadetblue", main = "Scale-Location Plot")
+
+# Residuals vs Leverage Plot
+plot(final_model, which = 5, col = "orange", main = "Residuals vs Leverage")
+
+# Reset the plotting parameters
+par(mfrow = c(1, 1))
+
+```
+
+
+ridge
+```{r}
+# Load the necessary library
+library(caret)
+
+# Set the seed for reproducibility
+set.seed(123)
+
+# Define the tuning grid for ridge regression
+ridgeGrid <- expand.grid(
+  lambda = seq(0, 1, by = 0.1)  # Range of lambda values
+)
+
+# Perform ridge regression using train() function
+ridgeModel <- train(
+  SALE_PRC ~ LATITUDE + PARCELNO + LND_SQFOOT + TOT_LVG_AREA + 
+    SPEC_FEAT_VAL + OCEAN_DIST + WATER_DIST + CNTR_DIST + 
+    SUBCNTR_DI + HWY_DIST + age + structure_quality + 
+    LATLON + LND_TOT_LVG_AREA + WATER_SUBCNTR_DI + HWY_age + LND_SQFOOT_WATER,
+  data = miami_housing,
+  method = "ridge",  # Use ridge regression
+  trControl = ctrl,
+  tuneGrid = ridgeGrid
+)
+
+# Print the ridge regression model
+print(ridgeModel)
+
+
+
+
+```
+
+
+```{r}
+# Extract RMSE, R-squared, and MAE from ridge regression
+ridgeRMSE <- min(ridgeModel$results$RMSE)
+ridgeRsquared <- max(ridgeModel$results$Rsquared)
+ridgeMAE <- min(ridgeModel$results$MAE)
+
+# Compare the performance of linear regression and ridge regression
+comparison <- data.frame(
+  Model = c("Linear Regression", "Ridge Regression"),
+  RMSE = c(0.2267, ridgeRMSE),
+  Rsquared = c(0.8506, ridgeRsquared),
+  MAE = c(0.1676, ridgeMAE)
+)
+
+print(comparison)
+```
+
+
+```{r}
+# Extract residuals from the final_model
+residuals <- residuals(ridgeModel)
+
+# Extract fitted values from the final_model
+fitted_values <- predict(ridgeModel)
+
+# Create a residuals vs. fitted values plot
+plot(fitted_values, residuals, 
+     main = "Residuals vs Fitted Values", 
+     xlab = "Fitted Values", 
+     ylab = "Residuals", 
+     col = "darkseagreen", 
+     pch = 16, 
+     cex = 1.2)
+abline(h = 0, col = "blue", lwd = 2)
+
+# Add a smooth line to visualize trends
+lines(lowess(final_model$fitted.values, residuals), col = "red", lwd = 2)
+
+
+```
+
+```{r}
+partition <- sample(2, nrow(miami_housing), replace = TRUE, prob = c(0.80, 0.20))
+head(partition)
+head(partition ==1)
+head(partition ==2)
+train <- miami_housing[partition == 1,]
+head(train)
+
+```
+
+```{r}
+test <- miami_housing[partition == 2 ,]
+head(test)
+dim(test)
+```
+
+```{r}
+prediction <- predict(final_model, test)
+head(prediction)
+```
+
+```{r}
+actual = test$SALE_PRC
+head(actual)
+```
+
+```{r}
+cor(prediction, actual)
+```
+
+```{r}
+plot(prediction, actual)
+```
+
+
+
